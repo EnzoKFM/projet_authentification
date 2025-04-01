@@ -13,11 +13,16 @@ const signUp = async (req, res) => {
 
 //Authentification
 const signIn = async (req, res) => {
-    const username = req.query.username;
-    const password = req.query.password;
+    const username = req.body.username;
+    const password = req.body.password;
 
-    const response = await verifyUser(username,password);
-    res.json(response);
+    const answer = await verifyUser(username,password);
+    if(answer){
+        res.render('signin');
+    } else {
+        res.json("Mauvais Mot de Passe");
+    }
+    
 }
 
 router.post('/signup', signUp)

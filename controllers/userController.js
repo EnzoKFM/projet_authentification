@@ -13,11 +13,12 @@ const verifyUser = async (nameToVerify,passToVerify) => {
         if(userTable[0][i].username === nameToVerify){
             const result = await bcrypt.compare(passToVerify,userTable[0][i].password)
 
-            if(result) {
-                return `Vous êtes bien l'utilisateur ${userTable[0][i].username}`;
-            } else {
-                return "Mot de passe incorrect";
-            }
+            return result;
+            // if(result) {
+            //     return `Vous êtes bien l'utilisateur ${userTable[0][i].username}`;
+            // } else {
+            //     return "Mot de passe incorrect";
+            // }
         }
     }
 }
