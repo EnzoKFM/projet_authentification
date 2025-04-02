@@ -5,13 +5,15 @@
     <title>Page de Connexion</title>
 </head>
 <body>
-    <p><%= error %></p>
-    <form action="http://localhost:3000/apiauth/signin" method="POST">
+    <h2>Se Connecter</h2>
+    <form action="http://localhost:3000/apiauth/login" method="POST">
         <label for="username">Username:</label><br>
         <input type="text" id="username" name="username" value=""><br>
         <label for="password">Password:</label><br>
         <input type="text" id="password" name="password" value=""><br><br>
         <input type="submit" value="Submit">
     </form>
+    <br /><br /><br />
+    <a href="http://localhost:3000">Retour</a>
 </body>
 </html>

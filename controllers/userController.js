@@ -1,26 +1,24 @@
-import { createUser,getAllUser } from '../models/userModel.js';
+import { createUser, getAllUser, findUser } from '../models/userModel.js';
 import bcrypt from 'bcrypt';
 
-const createNewUser = (username,password) => {
+const createNewUser = async (username,password) => {
+    const user = await findUser(username);
+
+    if(user[0].length != 0){
+        return;
+    }
+
     bcrypt.hash(password, 10, (err, hash) => {
         createUser(username,hash)
     })
 }
 
 const verifyUser = async (nameToVerify,passToVerify) => {
-    const userTable = await getAllUser();
-    for (let i = 0; i < userTable[0].length; i++) {
-        if(userTable[0][i].username === nameToVerify){
-            const result = await bcrypt.compare(passToVerify,userTable[0][i].password)
+    const user = await findUser(nameToVerify);
+    
+    const result = await bcrypt.compare(passToVerify,user[0][0].password)
 
-            return result;
-            // if(result) {
-            //     return `Vous êtes bien l'utilisateur ${userTable[0][i].username}`;
-            // } else {
-            //     return "Mot de passe incorrect";
-            // }
-        }
-    }
+    return result;
 }
 
 export {createNewUser, verifyUser}

@@ -16,5 +16,10 @@ const getAllUser = async () => {
     return userTable;
 }
 
-export {createUser, getAllUser}
+const findUser = async (name) => {
+    const user = await db.query(`SELECT * from user where username="${name}"`)
+    return user;
+}
+
+export {createUser, getAllUser, findUser}
 
