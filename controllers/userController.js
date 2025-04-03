@@ -1,4 +1,4 @@
-import { createUser, getAllUser, findUser } from '../models/userModel.js';
+import { createUser, findUser } from '../models/userModel.js';
 import bcrypt from 'bcrypt';
 
 const createNewUser = async (username,password) => {
@@ -21,7 +21,15 @@ const verifyUser = async (nameToVerify,passToVerify) => {
     return result;
 }
 
-export {createNewUser, verifyUser}
+const getUserRole = async (nameToVerify) => {
+    const user = await findUser(nameToVerify);
+    
+    const result = user[0][0].role;
+
+    return result;
+}
+
+export {createNewUser, verifyUser, getUserRole}
 
 
 
