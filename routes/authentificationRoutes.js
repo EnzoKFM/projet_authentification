@@ -21,7 +21,6 @@ const authenticate = (req, res, next) => {
     }
 }
 
-//Inscription
 const register = async (req, res) => {
     const {username, password} = req.body;
 
@@ -30,7 +29,6 @@ const register = async (req, res) => {
     res.redirect("/apiauth/login")
 }
 
-//Authentification
 const login = async (req, res) => {
     const {username, password} = req.body;
 
