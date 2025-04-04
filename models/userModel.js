@@ -16,5 +16,9 @@ const findUser = async (name) => {
     return user;
 }
 
-export {createUser, findUser}
+const updateUserOTP = async (name, totpSecret, mfaValidated) => {
+    await db.query(`UPDATE user SET totpSecret = ${totpSecret}, mfaValidated=${mfaValidated} WHERE username=${name}`)
+}
+
+export {createUser, findUser, updateUserOTP}
 

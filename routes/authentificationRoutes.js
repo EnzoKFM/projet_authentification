@@ -1,8 +1,10 @@
 import { Router } from "express";
 import jwt from 'jsonwebtoken';
-import { createNewUser, verifyUser, getUserRole } from "../controllers/userController.js"
+import { createNewUser, verifyUser, getUserDetails, setOTPDetails } from "../controllers/userController.js"
 import dotenv from 'dotenv';
-import { or } from "sequelize";
+import QRCode from 'qrcode';
+import {TOTP, Secret} from 'otpauth';
+import { updateUserOTP } from "../models/userModel.js";
 
 dotenv.config();
 
@@ -69,10 +71,12 @@ const login = async (req, res) => {
 
     const answer = await verifyUser(username,password);
     if(answer){
-        const role = await getUserRole(username);
-        const token = jwt.sign({username:username, role:role}, jwtSecretKey, { expiresIn: '1h' })
+        const user = await getUserDetails(username);
+        const token = jwt.sign({username:username, role:user.role}, jwtSecretKey, { expiresIn: '1h' })
         res.cookie('token', token, {httpOnly : true});
-        res.redirect("/apiauth/dashboard");
+        req.session.user = {username:username, totpSecret:user.totpSecret, mfaValidated:user.mfaValidated};
+        req.session.authenticated = true;
+        res.redirect("/apiauth/verify");
     } else {
         res.send("Mauvais Mot de Passe");
     }
@@ -95,7 +99,11 @@ router.post('/login', login)
 
 // Dashboard
 router.get('/dashboard', authenticate, (req,res) => {
-    res.render('dashboard', { username: req.user.username });
+    if (req.session.authenticated && req.session.user.mfaValidated) {
+        res.render('dashboard', { username: req.user.username });
+    } else {
+        res.redirect('/');
+    }
 })
 
 // Détails de l'utilisateur
@@ -103,6 +111,7 @@ router.get('/userDetails', isUser, (req,res) => {
     res.render('userDetails', { username: req.user.username, role:req.user.role });
 })
 
+// Panel Admin
 router.get('/adminPanel', isAdmin, (req,res) => {
     res.render('adminPanel', { username: req.user.username });
 })
@@ -112,5 +121,52 @@ router.get('/logout', (req,res) => {
     res.clearCookie('token');
     res.redirect('/');
 })
+
+//2FA
+router.get('/verify', async (req, res) => {
+    if (!req.session.authenticated) return res.redirect('/');
+
+    if (!req.session.user.totpSecret) {
+        // Générer une clé TOTP
+        const totp = new TOTP({
+            issuer: 'MFA-Demo-App',
+            label: req.session.user.username,
+            algorithm: 'SHA1',
+            digits: 6,
+            period: 30
+        });
+        req.session.user.totpSecret = totp.secret.base32;
+        const otpauthUrl = totp.toString(); // format otpauth://...
+        const qr = await QRCode.toDataURL(otpauthUrl); // génération d'un qrcode pour l'ajout dans un authenticator
+
+        return res.render('verify', { qr });
+    }
+    res.render('verify', { qr: null });
+});
+
+router.post('/verify', (req, res) => {
+    const { otpToken } = req.body;
+
+    const totp = new TOTP({
+        issuer: 'MFA-Demo-App',
+        label: req.session.user.username,
+        algorithm: 'SHA1',
+        digits: 6,
+        period: 30,
+        secret: Secret.fromBase32(req.session.user.totpSecret)
+    });
+
+    const now = Date.now();
+    const delta = totp.validate({ otpToken, timestamp: now });
+
+    if (delta !== null) {
+        req.session.user.mfaValidated = true
+        updateUserOTP(req.session.user.username, req.session.user.totpSecret, req.session.user.mfaValidated)
+        res.redirect('/apiauth/dashboard');
+    } else {
+        res.send('Code TOTP invalide.');
+    }
+});
+
 
 export default router; 

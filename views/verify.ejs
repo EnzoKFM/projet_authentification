@@ -1,0 +1,8 @@
+<% if (qr) { %>
+    <p>Scannez ce QR code avec votre app (Google Authenticator, etc.) :</p>
+    <img src="<%= qr %>">
+<% } %>
+<form method="POST" action="/apiauth/verify">
+    <input name="otpToken" placeholder="Code TOTP" />
+    <button type="submit">Vérifier</button>
+</form>

@@ -17,8 +17,13 @@
     "dotenv": "^16.4.7",
     "ejs": "^3.1.10",
     "express": "^5.1.0",
+    "express-session": "^1.18.1",
     "jsonwebtoken": "^9.0.2",
     "mysql2": "^3.14.0",
+    "otpauth": "^9.4.0",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
+    "qrcode": "^1.5.4",
     "sequelize": "^6.37.7",
     "sqlite3": "^5.1.7"
   }

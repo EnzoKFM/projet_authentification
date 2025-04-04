@@ -1,4 +1,4 @@
-import { createUser, findUser } from '../models/userModel.js';
+import { createUser, findUser, updateUserOTP } from '../models/userModel.js';
 import bcrypt from 'bcrypt';
 
 const createNewUser = async (username,password) => {
@@ -21,15 +21,19 @@ const verifyUser = async (nameToVerify,passToVerify) => {
     return result;
 }
 
-const getUserRole = async (nameToVerify) => {
+const getUserDetails = async (nameToVerify) => {
     const user = await findUser(nameToVerify);
     
-    const result = user[0][0].role;
+    const result = user[0][0];
 
     return result;
 }
 
-export {createNewUser, verifyUser, getUserRole}
+const setOTPDetails = async (username, totpSecret, mfaValidated) => {
+    await updateUserOTP(username,totpSecret, mfaValidated);
+}
+
+export {createNewUser, verifyUser, getUserDetails, setOTPDetails}
 
 
 
